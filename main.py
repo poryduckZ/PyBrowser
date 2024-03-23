@@ -1,4 +1,5 @@
 import socket
+import ssl
 
 class URL:
     # Scheme is separated from the rest of the URL by ://
@@ -6,11 +7,18 @@ class URL:
     # Host comes before the first /, the path is that slash and everything after it
     def __init__(self, url):
         self.scheme, url = url.split("://", 1)
-        assert self.scheme == "http"
+        assert self.scheme in ["http", "https"]
+        if self.scheme == "http":
+            self.port = 80
+        elif self.scheme == "https":
+            self.port = 443
         if "/" not in url:
             url = url + "/"
         self.host, url = url.split("/", 1)
         self.path = "/" + url
+        if ":" in self.host:
+            self.host, port = self.host.split(":", 1)
+            self.port = int(port)
 
     def request(self):
         # Socket has an address family and it begins with AF
@@ -21,7 +29,10 @@ class URL:
             type=socket.SOCK_STREAM,
             proto=socket.IPPROTO_TCP,
         )
-        s.connect((self.host, 80))
+        s.connect((self.host, self.port))
+        if self.scheme == "https":
+            ctx = ssl.create_default_context()
+            s = ctx.wrap_socket(s, server_hostname=self.host)
         s.send(("GET {} HTTP/1.0\r\n".format(self.path) +\
             "HOST: {}\r\n\r\n".format(self.host)).encode("utf-8"))
         # Note: utf8 is not correct but it’s a shortcut that will work on most English-language websites
