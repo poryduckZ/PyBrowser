@@ -28,9 +28,12 @@ class URL:
             self.port = int(port)
 
     def request(self):
-        if self.scheme == "file":
-            f = open(self.path, "r")
-            return f.read()
+        try:
+            if self.scheme == "file":
+                f = open(self.path, "r")
+                return f.read()
+        except FileNotFoundError:
+            return "File not found"
 
         # Socket has an address family and it begins with AF
         # Socket has a type, for example SOCK_STREAM and SOCK_DGRAM
