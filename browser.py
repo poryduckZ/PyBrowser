@@ -11,11 +11,18 @@ import ssl
 class URL:
     def __init__(self, url):
         self.scheme, url = url.split("://", 1)
-        assert self.scheme in ["http", "https", "file"]
+        assert self.scheme in ["http", "https", "file", "data"]
         if self.scheme == "file":
             self.path = url
             return
-        if self.scheme == "http":
+        elif self.scheme == "data":
+            self.path = url
+            if "," in url:
+                mine_type, data = url.split(",", 1)
+                print(data)
+                self.data = data
+            return
+        elif self.scheme == "http":
             self.port = 80
         elif self.scheme == "https":
             self.port = 443
@@ -28,55 +35,62 @@ class URL:
             self.port = int(port)
 
     def request(self):
-        try:
-            if self.scheme == "file":
+        if self.scheme == "file":
+            try:
                 f = open(self.path, "r")
-                return f.read()
-        except FileNotFoundError:
-            return "File not found"
+                content = f.read()
+                f.close()
+                return content
+            except FileNotFoundError:
+                return "File not found"
 
-        # Socket has an address family and it begins with AF
-        # Socket has a type, for example SOCK_STREAM and SOCK_DGRAM
-        # Socket has a protocol and it has names that depends on address family
-        s = socket.socket(
-            family=socket.AF_INET,
-            type=socket.SOCK_STREAM,
-            proto=socket.IPPROTO_TCP,
-        )
-        s.connect((self.host, self.port))
-        if self.scheme == "https":
-            ctx = ssl.create_default_context()
-            s = ctx.wrap_socket(s, server_hostname=self.host)
+        # TODO: Implement data scheme
+        if self.scheme == "data":
+            return
 
-        request_headers = {
-            "Host": self.host,
-            "Connection": "close", # Connection will close after the response
-            "User-Agent": "PythonBrowser/0.1", # Identifies the browser to the host
-        }
+        if self.scheme in ["http", "https"]:
+            # Socket has an address family and it begins with AF
+            # Socket has a type, for example SOCK_STREAM and SOCK_DGRAM
+            # Socket has a protocol and it has names that depends on address family
+            s = socket.socket(
+                family=socket.AF_INET,
+                type=socket.SOCK_STREAM,
+                proto=socket.IPPROTO_TCP,
+            )
+            s.connect((self.host, self.port))
+            if self.scheme == "https":
+                ctx = ssl.create_default_context()
+                s = ctx.wrap_socket(s, server_hostname=self.host)
 
-        request_lines = ["GET {} HTTP/1.1".format(self.path)]
-        request_lines.extend(["{}: {}".format(header, value) for header, value in request_headers.items()])
-        request_message = "\r\n".join(request_lines) + "\r\n\r\n"
-        s.send(request_message.encode("utf-8"))
+            request_headers = {
+                "Host": self.host,
+                "Connection": "close", # Connection will close after the response
+                "User-Agent": "PythonBrowser/0.1", # Identifies the browser to the host
+            }
 
-        # Note: utf8 is not correct but it’s a shortcut that will work on most English-language websites
-        response = s.makefile("r", encoding="utf8", newline="\r\n")
-        statusline = response.readline()
-        version, status, explanation = statusline.split(" ", 2)
+            request_lines = ["GET {} HTTP/1.1".format(self.path)]
+            request_lines.extend(["{}: {}".format(header, value) for header, value in request_headers.items()])
+            request_message = "\r\n".join(request_lines) + "\r\n\r\n"
+            s.send(request_message.encode("utf-8"))
 
-        response_headers = {}
-        while True:
-            line = response.readline()
-            if line == "\r\n":
-                break
-            header, value = line.split(":", 1)
-            response_headers[header.casefold()] = value.strip()
-        assert "transfer-encoding" not in response_headers
-        assert "content-encoding" not in response_headers
+            # Note: utf8 is not correct but it’s a shortcut that will work on most English-language websites
+            response = s.makefile("r", encoding="utf8", newline="\r\n")
+            statusline = response.readline()
+            version, status, explanation = statusline.split(" ", 2)
 
-        body = response.read()
-        s.close()
-        return body
+            response_headers = {}
+            while True:
+                line = response.readline()
+                if line == "\r\n":
+                    break
+                header, value = line.split(":", 1)
+                response_headers[header.casefold()] = value.strip()
+            assert "transfer-encoding" not in response_headers
+            assert "content-encoding" not in response_headers
+
+            body = response.read()
+            s.close()
+            return body
 
 def show(body):
     in_tag = False
