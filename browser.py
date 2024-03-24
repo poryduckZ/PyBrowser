@@ -1,6 +1,13 @@
 import socket
 import ssl
 
+# URL is defined as:
+# scheme "://" host [ ":" port ] [ "/" path ]
+# scheme is http or https
+# host is the domain name
+# port is the port number, default is 80 for http and 443 for https
+# path is the path to the resource on the server
+# Example: http://www.example.com:8080/path/to/resource
 class URL:
     # Scheme is separated from the rest of the URL by ://
     # Only supports http
@@ -33,12 +40,23 @@ class URL:
         if self.scheme == "https":
             ctx = ssl.create_default_context()
             s = ctx.wrap_socket(s, server_hostname=self.host)
-        s.send(("GET {} HTTP/1.0\r\n".format(self.path) +\
-            "HOST: {}\r\n\r\n".format(self.host)).encode("utf-8"))
+
+        request_headers = {
+            "Host": self.host,
+            "Connection": "close", # Connection will close after the response
+            "User-Agent": "PythonBrowser/0.1", # Identifies the browser to the host
+        }
+
+        request_lines = ["GET {} HTTP/1.1".format(self.path)]
+        request_lines.extend(["{}: {}".format(header, value) for header, value in request_headers.items()])
+        request_message = "\r\n".join(request_lines) + "\r\n\r\n"
+        s.send(request_message.encode("utf-8"))
+
         # Note: utf8 is not correct but it’s a shortcut that will work on most English-language websites
         response = s.makefile("r", encoding="utf8", newline="\r\n")
         statusline = response.readline()
         version, status, explanation = statusline.split(" ", 2)
+
         response_headers = {}
         while True:
             line = response.readline()
@@ -48,6 +66,7 @@ class URL:
             response_headers[header.casefold()] = value.strip()
         assert "transfer-encoding" not in response_headers
         assert "content-encoding" not in response_headers
+
         body = response.read()
         s.close()
         return body
@@ -69,5 +88,11 @@ def load(url):
     show(body)
 
 if __name__ == "__main__":
-    import sys
-    load(URL(sys.argv[1]))
+    choice = input("Press 1 to run main or 2 to run test: ")
+    if choice == "1":
+        url = input("Enter URL: ")
+        load(URL(url))
+    elif choice == "2":
+        print("TODO: Implement tests")
+    else:
+        print("Invalid choice")
