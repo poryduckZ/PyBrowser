@@ -9,12 +9,12 @@ import ssl
 # path is the path to the resource on the server
 # Example: http://www.example.com:8080/path/to/resource
 class URL:
-    # Scheme is separated from the rest of the URL by ://
-    # Only supports http
-    # Host comes before the first /, the path is that slash and everything after it
     def __init__(self, url):
         self.scheme, url = url.split("://", 1)
-        assert self.scheme in ["http", "https"]
+        assert self.scheme in ["http", "https", "file"]
+        if self.scheme == "file":
+            self.path = url
+            return
         if self.scheme == "http":
             self.port = 80
         elif self.scheme == "https":
@@ -28,6 +28,10 @@ class URL:
             self.port = int(port)
 
     def request(self):
+        if self.scheme == "file":
+            f = open(self.path, "r")
+            return f.read()
+
         # Socket has an address family and it begins with AF
         # Socket has a type, for example SOCK_STREAM and SOCK_DGRAM
         # Socket has a protocol and it has names that depends on address family
@@ -91,6 +95,8 @@ if __name__ == "__main__":
     choice = input("Press 1 to run main or 2 to run test: ")
     if choice == "1":
         url = input("Enter URL: ")
+        if not url:
+            url = "file://./tests/default.txt"
         load(URL(url))
     elif choice == "2":
         print("TODO: Implement tests")
