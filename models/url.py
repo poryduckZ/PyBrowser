@@ -1,14 +1,16 @@
 import socket
 import ssl
 
-# URL is defined as:
-# scheme "://" host [ ":" port ] [ "/" path ]
-# scheme is http or https
-# host is the domain name
-# port is the port number, default is 80 for http and 443 for https
-# path is the path to the resource on the server
-# Example: http://www.example.com:8080/path/to/resource
 class URL:
+    """
+    URL is defined as:
+    scheme "://" host [ ":" port ] [ "/" path ]
+    scheme is http or https
+    host is the domain name
+    port is the port number, default is 80 for http and 443 for https
+    path is the path to the resource on the server
+    Example: http://www.example.com:8080/path/to/resource
+    """
     def __init__(self, url):
         self.scheme, url = url.split("://", 1)
         assert self.scheme in ["http", "https", "file", "data"]
@@ -37,7 +39,7 @@ class URL:
     def request(self):
         if self.scheme == "file":
             try:
-                f = open(self.path, "r")
+                f = open(self.path, "r", encoding="utf-8")
                 content = f.read()
                 f.close()
                 return content
@@ -68,12 +70,13 @@ class URL:
                 "User-Agent": "PythonBrowser/0.1", # Identifies the browser to the host
             }
 
-            request_lines = ["GET {} HTTP/1.1".format(self.path)]
+            request_lines = [f"GET {self.path} HTTP/1.1"]
             request_lines.extend(["{}: {}".format(header, value) for header, value in request_headers.items()])
             request_message = "\r\n".join(request_lines) + "\r\n\r\n"
             s.send(request_message.encode("utf-8"))
 
-            # Note: utf8 is not correct but it’s a shortcut that will work on most English-language websites
+            # Note: utf8 is not correct
+            # but it’s a shortcut that will work on most English-language websites
             response = s.makefile("r", encoding="utf8", newline="\r\n")
             statusline = response.readline()
             version, status, explanation = statusline.split(" ", 2)
