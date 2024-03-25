@@ -12,17 +12,17 @@ class URL:
     Example: http://www.example.com:8080/path/to/resource
     """
     def __init__(self, url):
-        self.scheme, url = url.split("://", 1)
-        assert self.scheme in ["http", "https", "file", "data"]
-        if self.scheme == "file":
-            self.path = url
-            return
-        elif self.scheme == "data":
-            self.path = url
+        if url.startswith("data"):
+            self.scheme = "data"
             if "," in url:
                 mine_type, data = url.split(",", 1)
                 print(data)
                 self.data = data
+                return
+        self.scheme, url = url.split("://", 1)
+        assert self.scheme in ["http", "https", "file"]
+        if self.scheme == "file":
+            self.path = url
             return
         elif self.scheme == "http":
             self.port = 80
@@ -46,9 +46,8 @@ class URL:
             except FileNotFoundError:
                 return "File not found"
 
-        # TODO: Implement data scheme
         if self.scheme == "data":
-            return
+            return self.data
 
         if self.scheme in ["http", "https"]:
             # Socket has an address family and it begins with AF
