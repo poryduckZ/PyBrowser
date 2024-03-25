@@ -18,7 +18,7 @@ Ensure you have Python 3.x installed on your system.
 Clone the PyBrowser repository:
 
 ```bash
-git clone https://github.com/your-username/PyBrowser.git
+git clone https://github.com/poryduckZ/PyBrowser.git
 cd PyBrowser
 ```
 ### Running PyBrowser
@@ -31,4 +31,3 @@ python main.py
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE) file for details.
-
