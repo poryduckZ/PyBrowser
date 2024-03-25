@@ -1,10 +1,11 @@
+import tkinter
 from models.url import URL
-from utils.utils import load
-
+from models.browser import Browser
 
 if __name__ == "__main__":
     import sys
     if len(sys.argv) < 2:
-        load(URL("file://./tests/default.txt"))
+        print("Usage: python main.py <url>")
     elif len(sys.argv) == 2:
-        load(URL(sys.argv[1]))
+        Browser().load(URL(sys.argv[1]))
+        tkinter.mainloop()

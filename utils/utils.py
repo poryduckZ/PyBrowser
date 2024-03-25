@@ -1,4 +1,5 @@
-def show(body):
+def lex(body):
+    text = ""
     in_tag = False
     # Example: <a href="http://www.example.com">Example</a>
     #          ^ in_tag = True                 ^ in_tag = False, print "Example"
@@ -8,8 +9,5 @@ def show(body):
         elif c == ">":
             in_tag = False
         elif not in_tag:
-            print(c, end="")
-
-def load(url):
-    body = url.request()
-    show(body)
+            text += c
+    return text
