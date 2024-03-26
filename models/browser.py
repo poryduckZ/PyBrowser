@@ -15,8 +15,10 @@ class Browser:
         )
         self.canvas.pack(fill=tkinter.BOTH, expand=True)
         self.scroll = 0
+        self.text = ""
         self.window.bind("<Down>", self.scrolldown)
         self.window.bind("<Up>", self.scrollup)
+        self.canvas.bind("<MouseWheel>", self.on_mousewheel)
         self.window.bind("<Configure>", self.on_resize)
 
     def scrolldown(self, e):
@@ -27,6 +29,18 @@ class Browser:
         if self.scroll > 0:
             self.scroll -= SCROLL_STEP
             self.draw()
+
+    def on_mousewheel(self, e):
+        self.scroll -= e.delta;
+        self.scroll = max(self.scroll, 0) # Prevent scrolling past the top
+        self.scroll = min(self.scroll, self.max_scroll()) # Prevent scrolling past the bottom
+        self.draw()
+
+    def max_scroll(self):
+        if self.display_list:
+            max_y = max(y for _, y, _ in self.display_list)
+            return max(0, max_y - self.canvas.winfo_height())
+        return 0
 
     def on_resize(self, event):
             self.display_list = layout(self.text, event.width)
