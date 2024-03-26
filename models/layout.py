@@ -1,5 +1,6 @@
 from models.text import Text
-from utils.utils import HSTEP, VSTEP, get_font
+from utils.constants import HSTEP, VSTEP
+from utils.font import get_font
 
 
 class Layout:

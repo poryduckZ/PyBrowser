@@ -1,7 +1,8 @@
 import tkinter
 import tkinter.font
 from models.layout import Layout
-from utils.utils import HEIGHT, SCROLL_STEP, VSTEP, WIDTH, lex
+from utils.constants import HEIGHT, SCROLL_STEP, VSTEP, WIDTH
+from utils.lexer import lex
 
 class Browser:
     def __init__(self):
