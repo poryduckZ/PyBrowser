@@ -35,8 +35,8 @@ class Browser:
             self.canvas.create_text(x, y - self.scroll, text=c)
 
     def load(self, url):
-        body = url.request()
-        text = lex(body)
+        body, view_source = url.request()
+        text = lex(body, view_source)
         self.display_list = layout(text)
         self.draw()
 

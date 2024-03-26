@@ -18,23 +18,27 @@ class URL:
                 mine_type, data = url.split(",", 1)
                 print(data)
                 self.data = data
+        else:
+            self.view_source = False
+            if url.startswith("view-source:"):
+                self.view_source = True
+                url = url[len("view-source:"):]
+            self.scheme, url = url.split("://", 1)
+            assert self.scheme in ["http", "https", "file"]
+            if self.scheme == "file":
+                self.path = url
                 return
-        self.scheme, url = url.split("://", 1)
-        assert self.scheme in ["http", "https", "file"]
-        if self.scheme == "file":
-            self.path = url
-            return
-        elif self.scheme == "http":
-            self.port = 80
-        elif self.scheme == "https":
-            self.port = 443
-        if "/" not in url:
-            url = url + "/"
-        self.host, url = url.split("/", 1)
-        self.path = "/" + url
-        if ":" in self.host:
-            self.host, port = self.host.split(":", 1)
-            self.port = int(port)
+            elif self.scheme == "http":
+                self.port = 80
+            elif self.scheme == "https":
+                self.port = 443
+            if "/" not in url:
+                url = url + "/"
+            self.host, url = url.split("/", 1)
+            self.path = "/" + url
+            if ":" in self.host:
+                self.host, port = self.host.split(":", 1)
+                self.port = int(port)
 
     def request(self):
         if self.scheme == "file":
@@ -92,4 +96,4 @@ class URL:
 
             body = response.read()
             s.close()
-            return body
+            return body, self.view_source
