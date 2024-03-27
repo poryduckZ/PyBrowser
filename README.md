@@ -26,7 +26,7 @@ cd PyBrowser
 To launch PyBrowser, run the following command in the terminal:
 
 ```bash
-python main.py
+python main.py <URL>
 ```
 ## License
 

@@ -55,7 +55,16 @@ class Layout:
         self.cursor_x += w + font.measure(" ")
 
     def flush(self):
-        if not self.line: return
+        """
+        Three responsibilities:
+            - Align the words along the baseline
+            - Add all those words to the display list
+            - Update the cursor_x and cursor_y fields
+        Note: Ascent is the distance from the baseline to the top of the font
+        Note: Descent is the distance from the baseline to the bottom of the font
+        """
+        if not self.line:
+            return
         metrics = [font.metrics() for x, word, font in self.line]
         max_ascent = max([metric["ascent"] for metric in metrics])
         baseline = self.cursor_y + 1.25 * max_ascent
