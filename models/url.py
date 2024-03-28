@@ -16,7 +16,6 @@ class URL:
             self.scheme = "data"
             if "," in url:
                 mine_type, data = url.split(",", 1)
-                print(data)
                 self.data = data
         else:
             self.view_source = False
@@ -46,12 +45,12 @@ class URL:
                 f = open(self.path, "r", encoding="utf-8")
                 content = f.read()
                 f.close()
-                return content
+                return content, False
             except FileNotFoundError:
                 return "File not found"
 
         if self.scheme == "data":
-            return self.data
+            return self.data, False
 
         if self.scheme in ["http", "https"]:
             # Socket has an address family and it begins with AF
