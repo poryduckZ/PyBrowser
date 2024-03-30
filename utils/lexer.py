@@ -3,7 +3,8 @@ from models.text import Text
 
 
 def lex(body, view_source=False):
-    body = body.replace("&lt;", "<").replace("&gt;", ">")
+    # TODO: Entities support (e.g. &lt; &gt;)
+    # body = body.replace("&lt;", "<").replace("&gt;", ">")
     if view_source:
         return body
 
