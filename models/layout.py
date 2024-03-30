@@ -14,6 +14,7 @@ class Layout:
         self.weight = "normal"
         self.style = "roman"
         self.size = 16
+        self.center = False
 
         self.line = []
         for tok in tokens:
@@ -45,10 +46,25 @@ class Layout:
         elif tok.tag == "/p":
             self.flush()
             self.cursor_y += VSTEP
+        elif tok.tag == 'h1 class="title"':
+            self.flush()
+            self.size += 8
+            self.center = True
+            self.weight = "bold"
+        elif tok.tag == "/h1":
+            if self.center:
+                self.flush()
+                self.size -= 8
+                self.center = False
+                self.weight = "normal"
 
     def word(self, word):
         font = get_font(self.size, self.weight, self.style)
         w = font.measure(word)
+        # TODO: Text is not centered correctly, for example, formatting text is leans to the right
+        # since w is just the width of the first word which is not the same as the width of the whole line
+        if self.center and self.cursor_x == HSTEP:
+            self.cursor_x = (self.canvas_width / 2) - w / 2
         if self.cursor_x + w > self.canvas_width - HSTEP:
             self.flush()
         self.line.append((self.cursor_x, word, font))
