@@ -15,6 +15,7 @@ class Layout:
         self.style = "roman"
         self.size = 16
         self.center = False
+        self.superscript = False
 
         self.line = []
         for tok in tokens:
@@ -57,6 +58,12 @@ class Layout:
                 self.size -= 8
                 self.center = False
                 self.weight = "normal"
+        elif tok.tag == "sup":
+            self.superscript = True
+            self.size = 8
+        elif tok.tag == "/sup":
+            self.superscript = False
+            self.size = 16
 
     def word(self, word):
         font = get_font(self.size, self.weight, self.style)
