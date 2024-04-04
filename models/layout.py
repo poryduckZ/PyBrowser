@@ -16,6 +16,7 @@ class Layout:
         self.size = 16
         self.center = False
         self.superscript = False
+        self.capital = False
 
         self.line = []
         for tok in tokens:
@@ -64,9 +65,19 @@ class Layout:
         elif tok.tag == "/sup":
             self.superscript = False
             self.size = 16
+        elif tok.tag == "abbr":
+            self.size -= 2
+            self.weight = "bold"
+            self.capital = True
+        elif tok.tag == "/abbr":
+            self.size += 2
+            self.weight = "normal"
+            self.capital = False
 
     def word(self, word):
         font = get_font(self.size, self.weight, self.style)
+        if self.capital:
+            word = word.upper()
         w = font.measure(word)
         # TODO: Text is not centered correctly, for example, formatting text is leans to the right
         # since w is just the width of the first word which is not the same as the width of the whole line
